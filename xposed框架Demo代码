@@ -1,0 +1,45 @@
+package com.example.xposednew;
+
+import android.util.Log;
+
+import de.robv.android.xposed.IXposedHookInitPackageResources;
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_LoadPackage;
+
+public class XposeEntry implements IXposedHookLoadPackage {
+
+
+    @Override
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
+        //if (loadPackageParam.packageName.equals(""))//对我们需要挂钩的apk进行判断
+        //对钩子进行异常保护
+        try {
+            XposedHelpers.findAndHookMethod("android.content.res.Resources",
+                    loadPackageParam.classLoader,
+                    "getColor",int.class, new mygetColor());
+            //waitforde
+        }catch (Exception e){
+
+            e.printStackTrace();
+        }
+
+  }
+}
+class mygetColor extends XC_MethodHook{
+//重写调用前和调用后的函数
+    protected void beforeHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
+        Log.d("xposed example"," before method hook");
+
+    }
+
+    protected void afterHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
+        Log.d("xposed example","after method hook");
+        int rel = (int)param.getResult();//获取到被hook函数的结果
+        rel = rel & ~0x0000ff00|0xffff0000;//
+        param.setResult(rel);
+    }
+
+
+}
